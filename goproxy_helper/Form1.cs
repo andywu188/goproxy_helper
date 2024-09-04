@@ -1,15 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace goproxy_helper
@@ -59,15 +51,37 @@ namespace goproxy_helper
             }
             return "";
         }
+        private string edgePath()
+        {
+            object path2;
+            path2 = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\msedge.exe", "", null);
+            if (path2 != null)
+            {
+                return path2.ToString();
+            }
+            return "";
+        }
+        private string otherPath()
+        {
+            object path2;
+            path2 = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\360se6.exe", "", null);
+            if (path2 != null)
+            {
+                return path2.ToString();
+            }
+            return "";
+        }
+
 
         private void main_Load(object sender, EventArgs e)
         {
-
-            string chromebinpath = this.chromePath();
-            string firefoxbinpath = this.firefoxPath();
-            if (chromebinpath == "" && firefoxbinpath == "")
+            if (string.IsNullOrEmpty(this.chromePath()) && string.IsNullOrEmpty(this.firefoxPath()) && string.IsNullOrEmpty(this.edgePath()) && string.IsNullOrEmpty(this.otherPath()))
             {
-                label2.Text = "请先安装最新版chrome或者firefox，才能正常使用goproxy控制面板。\n如果已安装请手动打开使用：http://127.0.0.1:32080访问";
+                lblTips.Text = "请先安装最新版chrome、edge或者firefox等现代浏览器，才能正常使用goproxy控制面板。\n如果已安装请手动打开使用：http://127.0.0.1:32080访问";
+            }
+            else
+            {
+                lblTips.Text = string.Empty;
             }
             refreshStatus();
         }
@@ -174,6 +188,8 @@ namespace goproxy_helper
             }
             string chromebinpath = this.chromePath();
             string firefoxbinpath = this.firefoxPath();
+            string edgebinpath = this.edgePath();
+            string otherbinpath = this.otherPath();
             string browser = "";
 
             if (chromebinpath != "")
@@ -184,9 +200,17 @@ namespace goproxy_helper
             {
                 browser = "firefox.exe";
             }
+            else if (edgebinpath != "")
+            {
+                browser = "msedge.exe";
+            }
+            else if (otherbinpath != "")
+            {
+                browser = "360se6.exe";
+            }
             else
             {
-                MessageBox.Show("请先安装最新版 Google Chrome 或者 Firefox 浏览器！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("请先安装最新版 Google Chrome 、Microsoft Edge 或者 Firefox 等现代浏览器！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             System.Diagnostics.Process.Start(browser, "http://127.0.0.1:32080");
@@ -226,6 +250,11 @@ namespace goproxy_helper
                 return;
             }
             MessageBox.Show(Service.Start(serviceName) ? "启动成功" : "启动失败", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("http://127.0.0.1:32080");
         }
     }
 }
